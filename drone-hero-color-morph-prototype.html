@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+!DOCTYPE html>
 <html lang="es">
 
 <head>
@@ -60,33 +60,6 @@
       background: radial-gradient(circle at 68% 42%, var(--accent-soft), transparent 55%);
       filter: blur(10px);
       opacity: 0.9;
-    }
-
-    .topbar {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 28px 48px;
-      z-index: 5;
-      font-size: 13px;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--fg-dim);
-    }
-
-    .topbar .brand {
-      color: var(--fg);
-      font-weight: 700;
-      letter-spacing: 0.18em;
-    }
-
-    .topbar nav {
-      display: flex;
-      gap: 28px;
     }
 
     .hero-grid {
@@ -287,25 +260,138 @@
         bottom: 34px;
       }
     }
+
+    /* ==================== Nav global SPECTRUS ==================== */
+    .site-nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 0;
+      border-bottom: 1px solid transparent;
+      background: transparent;
+      backdrop-filter: blur(0px);
+      transition: background 0.35s ease, backdrop-filter 0.35s ease, border-color 0.35s ease;
+    }
+
+    .site-nav.solid {
+      background: rgba(5, 6, 10, 0.7);
+      backdrop-filter: blur(14px);
+      border-color: rgba(255, 255, 255, 0.08);
+    }
+
+    .site-nav-brand {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      color: var(--fg);
+    }
+
+    /* ==================== Vista 1 — Carousel infinito de videos ==================== */
+    .marquee-section {
+      position: relative;
+      height: 100vh;
+      overflow: hidden;
+      background: #000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 34px;
+    }
+
+    .marquee-intro {
+      font-size: 12px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--fg-dim);
+      text-align: center;
+    }
+
+    .marquee-viewport {
+      width: 100%;
+      overflow: hidden;
+      cursor: grab;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    .marquee-viewport.dragging {
+      cursor: grabbing;
+    }
+
+    .marquee-track {
+      display: flex;
+      gap: 22px;
+      will-change: transform;
+      padding: 0 22px;
+    }
+
+    .marquee-item {
+      position: relative;
+      flex: 0 0 auto;
+      width: 30vw;
+      min-width: 320px;
+      max-width: 560px;
+      aspect-ratio: 16 / 9;
+      border-radius: 14px;
+      overflow: hidden;
+      background: #111;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    }
+
+    .marquee-item video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      pointer-events: none;
+    }
+
+    .marquee-item .label {
+      position: absolute;
+      left: 16px;
+      bottom: 14px;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #fff;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+    }
+
+    .marquee-item::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.55), transparent 45%);
+      pointer-events: none;
+    }
   </style>
 </head>
 
 <body>
 
-  <div class="spacer">↓ scroll para empezar ↓</div>
+  <header class="site-nav" id="siteNav">
+    <div class="site-nav-brand">SPECTRUS</div>
+  </header>
+
+  <section class="marquee-section" id="marqueeSection">
+    <div class="marquee-intro">Trabajo seleccionado — arrastra para explorar</div>
+    <div class="marquee-viewport" id="marqueeViewport">
+      <div class="marquee-track" id="marqueeTrack"></div>
+    </div>
+  </section>
+
+  <div class="spacer">↓ continúa hacia la flota ↓</div>
 
   <div class="hero-pin-wrap" id="heroPinWrap">
     <div class="hero" id="hero">
       <div class="hero-glow" id="heroGlow"></div>
-
-      <div class="topbar">
-        <div class="brand">AERIS</div>
-        <nav>
-          <span>Flota</span>
-          <span>Tecnología</span>
-          <span>Proyectos</span>
-        </nav>
-      </div>
 
       <div class="progress-index"><b id="progIdx">01</b> / 04</div>
 
@@ -702,6 +788,104 @@
     }
 
     initThreeViewer();
+
+    // ============================================================
+    // NAV GLOBAL — se vuelve sólido apenas el usuario hace scroll
+    // ============================================================
+    const siteNav = document.getElementById('siteNav');
+    window.addEventListener('scroll', () => {
+      siteNav.classList.toggle('solid', window.scrollY > 40);
+    }, { passive: true });
+
+    // ============================================================
+    // VISTA 1 — CAROUSEL INFINITO DE VIDEOS (drag + inercia)
+    // ============================================================
+    // 👉 Videos de prueba públicos, solo para probar el efecto.
+    // Reemplaza este array por tus clips reales cuando los tengas
+    // (mismo formato: { src, label }).
+    const MARQUEE_VIDEOS = [
+      { src: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4', label: 'Proyecto 01' },
+      { src: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4', label: 'Proyecto 02' },
+      { src: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4', label: 'Proyecto 03' },
+      { src: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4', label: 'Proyecto 04' },
+      { src: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4', label: 'Proyecto 05' },
+    ];
+
+    const marqueeViewport = document.getElementById('marqueeViewport');
+    const marqueeTrack = document.getElementById('marqueeTrack');
+
+    function buildMarqueeItem(item) {
+      const el = document.createElement('div');
+      el.className = 'marquee-item';
+      el.innerHTML = `
+        <video src="${item.src}" autoplay muted loop playsinline></video>
+        <span class="label">${item.label}</span>
+      `;
+      return el;
+    }
+
+    // Duplicamos el set completo una vez — es lo que permite el loop invisible
+    [...MARQUEE_VIDEOS, ...MARQUEE_VIDEOS].forEach((item) => {
+      marqueeTrack.appendChild(buildMarqueeItem(item));
+    });
+
+    let setWidth = 0;
+    function measureMarquee() {
+      // ancho de UN set completo (la mitad del track, ya que está duplicado) + un gap de separación con la copia
+      const gap = parseFloat(getComputedStyle(marqueeTrack).gap || '22');
+      setWidth = marqueeTrack.scrollWidth / 2;
+    }
+    measureMarquee();
+    window.addEventListener('resize', measureMarquee);
+
+    let marqueeVirtualX = 0;
+    let marqueeIsDragging = false;
+    let marqueeVelocity = 0;
+    let marqueeLastX = 0;
+    let marqueeStartX = 0;
+    let marqueeStartVirtualX = 0;
+    const MARQUEE_SPEED = 0.55; // px/frame de autoplay
+
+    gsap.ticker.add(() => {
+      if (!setWidth) return;
+      if (!marqueeIsDragging) {
+        marqueeVirtualX -= MARQUEE_SPEED;
+        // fricción residual de una inercia previa, si la hay
+        if (Math.abs(marqueeVelocity) > 0.01) {
+          marqueeVirtualX += marqueeVelocity;
+          marqueeVelocity *= 0.94;
+        }
+      }
+      const wrapped = gsap.utils.wrap(-setWidth, 0, marqueeVirtualX);
+      gsap.set(marqueeTrack, { x: wrapped });
+    });
+
+    marqueeViewport.addEventListener('pointerdown', (e) => {
+      marqueeIsDragging = true;
+      marqueeVelocity = 0;
+      marqueeStartX = e.clientX;
+      marqueeLastX = e.clientX;
+      marqueeStartVirtualX = marqueeVirtualX;
+      marqueeViewport.classList.add('dragging');
+      marqueeViewport.setPointerCapture(e.pointerId);
+    });
+
+    marqueeViewport.addEventListener('pointermove', (e) => {
+      if (!marqueeIsDragging) return;
+      const delta = e.clientX - marqueeStartX;
+      marqueeVirtualX = marqueeStartVirtualX + delta;
+      marqueeVelocity = e.clientX - marqueeLastX;
+      marqueeLastX = e.clientX;
+    });
+
+    function endMarqueeDrag() {
+      if (!marqueeIsDragging) return;
+      marqueeIsDragging = false;
+      marqueeViewport.classList.remove('dragging');
+      // la inercia se resuelve dentro del propio ticker de arriba (fricción sobre marqueeVelocity)
+    }
+    marqueeViewport.addEventListener('pointerup', endMarqueeDrag);
+    marqueeViewport.addEventListener('pointerleave', endMarqueeDrag);
 
   </script>
 </body>
