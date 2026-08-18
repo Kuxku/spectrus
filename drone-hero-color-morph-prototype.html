@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Drone Hero — Color Morph Prototype</title>
+  <style>
+    :root {
+      --bg-0: #05060a;
+      --bg-1: #05060a;
+      --accent: #4ea8ff;
+      --accent-soft: rgba(78, 168, 255, 0.18);
+      --fg: #f4f5f7;
+      --fg-dim: rgba(244, 245, 247, 0.6);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      background: #000;
+      color: var(--fg);
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    /* Spacer sections so the hero has scroll distance to scrub through */
+    .spacer {
+      height: 60vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(255, 255, 255, 0.25);
+      font-size: 13px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    .hero-pin-wrap {
+      position: relative;
+    }
+
+    .hero {
+      position: relative;
+      height: 100vh;
+      width: 100%;
+      overflow: hidden;
+      background: radial-gradient(circle at 65% 40%, var(--bg-1) 0%, #05060a 55%, #000 100%);
+      transition: background 0.1s linear;
+    }
+
+    .hero-glow {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(circle at 68% 42%, var(--accent-soft), transparent 55%);
+      filter: blur(10px);
+      opacity: 0.9;
+    }
+
+    .topbar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 28px 48px;
+      z-index: 5;
+      font-size: 13px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--fg-dim);
+    }
+
+    .topbar .brand {
+      color: var(--fg);
+      font-weight: 700;
+      letter-spacing: 0.18em;
+    }
+
+    .topbar nav {
+      display: flex;
+      gap: 28px;
+    }
+
+    .hero-grid {
+      position: relative;
+      height: 100%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      padding: 0 6vw;
+      z-index: 3;
+    }
+
+    .copy {
+      max-width: 460px;
+    }
+
+    .eyebrow {
+      display: inline-block;
+      font-size: 12px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      border: 1px solid var(--accent-soft);
+      padding: 6px 14px;
+      border-radius: 999px;
+      margin-bottom: 22px;
+      transition: color 0.4s ease, border-color 0.4s ease;
+    }
+
+    .title {
+      font-size: clamp(36px, 4.4vw, 62px);
+      line-height: 1.05;
+      font-weight: 700;
+      margin: 0 0 18px;
+      letter-spacing: -0.01em;
+    }
+
+    .desc {
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--fg-dim);
+      margin-bottom: 30px;
+    }
+
+    .specs-row {
+      display: flex;
+      gap: 28px;
+      margin-bottom: 34px;
+    }
+
+    .spec {
+      border-left: 1px solid rgba(255, 255, 255, 0.12);
+      padding-left: 14px;
+    }
+
+    .spec .val {
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .spec .lbl {
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--fg-dim);
+      margin-top: 2px;
+    }
+
+    .cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--fg);
+      color: #05060a;
+      border: none;
+      padding: 14px 24px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* Drone stage */
+    .stage {
+      position: relative;
+      height: 70vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: visible;
+    }
+
+    /* Nav: arrows + dots */
+    .hero-nav {
+      position: absolute;
+      left: 6vw;
+      bottom: 56px;
+      display: flex;
+      align-items: center;
+      gap: 22px;
+      z-index: 5;
+    }
+
+    .arrow-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--fg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 16px;
+      transition: border-color 0.25s ease, background 0.25s ease;
+    }
+
+    .arrow-btn:hover {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .dots {
+      display: flex;
+      gap: 10px;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.25);
+      cursor: pointer;
+      transition: background 0.3s ease, transform 0.3s ease, width 0.3s ease;
+    }
+
+    .dot.active {
+      background: var(--accent);
+      width: 22px;
+      border-radius: 5px;
+    }
+
+    .progress-index {
+      position: absolute;
+      top: 28px;
+      right: 48px;
+      font-size: 13px;
+      color: var(--fg-dim);
+      letter-spacing: 0.1em;
+      z-index: 5;
+    }
+
+    .progress-index b {
+      color: var(--fg);
+    }
+
+    .scroll-hint {
+      position: absolute;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--fg-dim);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      z-index: 5;
+    }
+
+    .scroll-hint .line {
+      width: 1px;
+      height: 30px;
+      background: linear-gradient(to bottom, var(--fg-dim), transparent);
+    }
+
+    @media (max-width: 860px) {
+      .hero-grid {
+        grid-template-columns: 1fr;
+        padding: 0 24px;
+      }
+
+      .stage {
+        height: 42vh;
+        order: -1;
+      }
+
+      .copy {
+        max-width: 100%;
+        padding-top: 90px;
+      }
+
+      .hero-nav {
+        left: 24px;
+        bottom: 34px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="spacer">↓ scroll para empezar ↓</div>
+
+  <div class="hero-pin-wrap" id="heroPinWrap">
+    <div class="hero" id="hero">
+      <div class="hero-glow" id="heroGlow"></div>
+
+      <div class="topbar">
+        <div class="brand">AERIS</div>
+        <nav>
+          <span>Flota</span>
+          <span>Tecnología</span>
+          <span>Proyectos</span>
+        </nav>
+      </div>
+
+      <div class="progress-index"><b id="progIdx">01</b> / 04</div>
+
+      <div class="hero-grid">
+        <div class="copy">
+          <span class="eyebrow" id="eyebrow">Scout Class</span>
+          <h1 class="title" id="title">AERIS-01<br />Scout</h1>
+          <p class="desc" id="desc">Reconocimiento ágil y silencioso. Diseñado para exploración rápida en espacios
+            reducidos, con estabilización de vuelo de precisión.</p>
+          <div class="specs-row" id="specsRow">
+            <div class="spec">
+              <div class="val">28 min</div>
+              <div class="lbl">Autonomía</div>
+            </div>
+            <div class="spec">
+              <div class="val">6.2 km</div>
+              <div class="lbl">Alcance</div>
+            </div>
+            <div class="spec">
+              <div class="val">890 g</div>
+              <div class="lbl">Peso</div>
+            </div>
+          </div>
+          <button class="cta">Explorar AERIS-01 →</button>
+        </div>
+
+        <div class="stage" id="stage">
+          <!-- modelos GLB reales renderizados aquí vía Three.js -->
+          <canvas id="droneCanvas"
+            style="position:absolute; inset:0; width:100%; height:100%; pointer-events:none;"></canvas>
+        </div>
+      </div>
+
+      <div class="hero-nav">
+        <button class="arrow-btn" id="prevBtn">‹</button>
+        <div class="dots" id="dots"></div>
+        <button class="arrow-btn" id="nextBtn">›</button>
+      </div>
+
+
+
+      <div class="scroll-hint" id="scrollHint">
+        <span>scroll</span>
+        <div class="line"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="spacer">↓ continúa la narrativa (features, specs, casos...) ↓</div>
+  <div class="spacer" style="height:100vh; color:rgba(255,255,255,0.4);">Resto del scroll narrativo con el dron elegido
+    como protagonista</div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollToPlugin.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+  <script>
+    gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
+
+    // ---- Drone data (placeholder — swap for real PNG/WebP or SVG assets later) ----
+    const DRONES = [
+      {
+        id: 'scout',
+        code: 'AERIS-01',
+        name: 'Scout',
+        eyebrow: 'Scout Class',
+        desc: 'Reconocimiento ágil y silencioso. Diseñado para exploración rápida en espacios reducidos, con estabilización de vuelo de precisión.',
+        accent: '#4ea8ff',
+        specs: [['28 min', 'Autonomía'], ['6.2 km', 'Alcance'], ['890 g', 'Peso']],
+        glb: './models/drone.glb', // reemplazar por el archivo real del AERIS-01
+      },
+      {
+        id: 'racer',
+        code: 'AERIS-02',
+        name: 'Racer',
+        eyebrow: 'Racer Class',
+        desc: 'Construido para velocidad. Chasis de fibra de carbono y sistema de vuelo FPV de baja latencia para maniobras extremas.',
+        accent: '#ff5b3d',
+        specs: [['140 km/h', 'Vel. máx'], ['3.4 km', 'Alcance'], ['420 g', 'Peso']],
+        glb: './models/rc_drone.glb', // reemplazar por el archivo real del AERIS-02
+      },
+      {
+        id: 'cargo',
+        code: 'AERIS-03',
+        name: 'Cargo',
+        eyebrow: 'Cargo Class',
+        desc: 'Capacidad de carga optimizada para entregas de última milla, con navegación autónoma y aterrizaje de precisión.',
+        accent: '#3ddc84',
+        specs: [['5 kg', 'Carga máx'], ['12 km', 'Alcance'], ['2.1 kg', 'Peso']],
+        glb: './models/drone_1.glb', // reemplazar por el archivo real del AERIS-03
+      },
+      {
+        id: 'recon',
+        code: 'AERIS-04',
+        name: 'Recon',
+        eyebrow: 'Recon Class',
+        desc: 'Vigilancia de largo alcance con cámara térmica integrada y sistema anti-viento para condiciones extremas.',
+        accent: '#c58cff',
+        specs: [['52 min', 'Autonomía'], ['18 km', 'Alcance'], ['1.4 kg', 'Peso']],
+        glb: './models/drone_2.glb', // reemplazar por el archivo real del AERIS-04
+      },
+    ];
+
+    const stage = document.getElementById('stage');
+    const dotsWrap = document.getElementById('dots');
+
+    // ============================================================
+    // Cada dron ya tiene su propia ruta en el array DRONES de arriba
+    // (campo `glb`). Hoy los 4 apuntan al mismo archivo de prueba —
+    // cuando tengas los 4 modelos reales, edita el campo `glb` de
+    // cada dron individualmente ahí arriba.
+    // DRONE_GLB_PATH abajo queda solo como referencia/fallback.
+    const DRONE_GLB_PATH = './models/drone.glb';
+    // ============================================================
+
+    DRONES.forEach((d, i) => {
+      const dot = document.createElement('div');
+      dot.className = 'dot' + (i === 0 ? ' active' : '');
+      dot.dataset.index = i;
+      dotsWrap.appendChild(dot);
+    });
+
+    let current = 0;
+    let animating = false;
+
+    // Declaradas aquí arriba (no más abajo) porque applyDiagonalPositions3D
+    // las usa y se ejecuta desde el primer renderDrone(0,...) casi al inicio.
+    let three = { renderer: null, scene: null, camera: null, rimLight: null };
+    let modelInstances = {}; // index -> { root, baseScale, opacityProxy }
+    let glbCache = {};       // path -> Object3D fuente (para no recargar el mismo archivo 4 veces)
+
+    // ---- Diagonal "conveyor" positions ----
+    // center: the active/current drone, full size
+    // peekIn: the NEXT drone, waiting small & faded in the bottom-right corner
+    // exitOut: the PREVIOUS drone, having just exited toward the top-left, small & faded
+    // hidden: anything 2+ steps away — not part of the visible conveyor
+    function relIndex(i, ref, total) {
+      let d = i - ref;
+      while (d > total / 2) d -= total;
+      while (d < -total / 2) d += total;
+      return d;
+    }
+
+    // ---- Same conveyor, but in 3D world-space (for the real GLB models) ----
+    const POS3D = {
+      center: { x: 0, y: 0, z: 0, ry: 0, scale: 1, opacity: 1, duration: 1.35 },
+      peekIn: { x: 2.6, y: -1.6, z: -2.0, ry: 0.7, scale: 0.28, opacity: 0.4, duration: 1.35 },
+      exitOut: { x: -2.8, y: 1.7, z: -1.6, ry: -0.7, scale: 0.5, opacity: 0, duration: 1.35 },
+      hidden: { x: 0, y: 0, z: -6, ry: 0, scale: 0.15, opacity: 0, duration: 0 },
+    };
+
+    function setModelOpacity(root, value) {
+      root.traverse((obj) => {
+        if (obj.isMesh && obj.material) {
+          const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
+          mats.forEach((m) => { m.transparent = true; m.opacity = value; });
+        }
+      });
+    }
+
+    function applyDiagonalPositions3D(newIndex, instant = false) {
+      DRONES.forEach((_, i) => {
+        const inst = modelInstances[i];
+        if (!inst) return; // ese dron aún no cargó su modelo 3D — sigue usando el SVG mientras tanto
+        const rel = relIndex(i, newIndex, DRONES.length);
+        let t;
+        if (rel === 0) t = POS3D.center;
+        else if (rel === 1) t = POS3D.peekIn;
+        else if (rel === -1) t = POS3D.exitOut;
+        else t = POS3D.hidden;
+
+        const s = t.scale * inst.baseScale;
+
+        if (instant) {
+          inst.root.position.set(t.x, t.y, t.z);
+          inst.root.rotation.y = t.ry;
+          inst.root.scale.setScalar(s);
+          setModelOpacity(inst.root, t.opacity);
+          inst.opacityProxy.v = t.opacity;
+        } else {
+          gsap.to(inst.root.position, { x: t.x, y: t.y, z: t.z, duration: t.duration, ease: 'sine.inOut' });
+          gsap.to(inst.root.rotation, { y: t.ry, duration: t.duration, ease: 'sine.inOut' });
+          gsap.to(inst.root.scale, { x: s, y: s, z: s, duration: t.duration, ease: 'sine.inOut' });
+          gsap.to(inst.opacityProxy, {
+            v: t.opacity, duration: t.duration, ease: 'sine.inOut',
+            onUpdate: () => setModelOpacity(inst.root, inst.opacityProxy.v),
+          });
+        }
+      });
+    }
+
+    function hexToRgba(hex, a) {
+      const r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
+      return `rgba(${r},${g},${b},${a})`;
+    }
+
+    function renderDrone(index, { instant = false } = {}) {
+      const d = DRONES[index];
+
+      applyDiagonalPositions3D(index, instant);
+      if (three.rimLight) three.rimLight.color.set(d.accent);
+
+      // Text + specs crossfade
+      const copy = document.querySelector('.copy');
+      gsap.fromTo(copy, { opacity: instant ? 1 : 0.001, y: instant ? 0 : 14 }, { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' });
+
+      document.getElementById('eyebrow').textContent = d.eyebrow;
+      document.getElementById('title').innerHTML = `${d.code}<br/>${d.name}`;
+      document.getElementById('desc').textContent = d.desc;
+      document.getElementById('progIdx').textContent = String(index + 1).padStart(2, '0');
+      document.querySelector('.cta').textContent = `Explorar ${d.code} →`;
+
+      const specsRow = document.getElementById('specsRow');
+      specsRow.innerHTML = d.specs.map(([val, lbl]) => `
+    <div class="spec"><div class="val">${val}</div><div class="lbl">${lbl}</div></div>
+  `).join('');
+
+      // Background + accent color morph
+      const root = document.documentElement.style;
+      gsap.to(document.getElementById('hero'), {
+        duration: instant ? 0 : 0.8,
+        ease: 'power2.inOut',
+        onUpdate: null,
+      });
+      gsap.to(root, {
+        '--accent': d.accent,
+        duration: instant ? 0 : 0.05,
+      });
+      // manual color tween since CSS var interpolation via gsap needs plugin; do it manually:
+      const from = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || d.accent;
+      animateCssVar('--accent', d.accent, instant ? 0 : 0.8);
+      animateCssVar('--bg-1', hexToRgba(d.accent, 0.12), instant ? 0 : 0.8);
+      document.documentElement.style.setProperty('--accent-soft', hexToRgba(d.accent, 0.18));
+
+      // Dots
+      document.querySelectorAll('.dot').forEach((dot, i) => {
+        dot.classList.toggle('active', i === index);
+      });
+
+      current = index;
+    }
+
+    // Manual CSS custom property color tween (hex or rgba string) using a proxy object
+    function animateCssVar(varName, toValue, duration) {
+      const el = document.documentElement;
+      const current = getComputedStyle(el).getPropertyValue(varName).trim();
+      const proxy = { t: 0 };
+      gsap.to(proxy, {
+        t: 1,
+        duration,
+        ease: 'power2.inOut',
+        onUpdate: () => {
+          // simple crossfade: swap at ~50% for solid colors, or just set directly (GSAP can't interpolate raw hex without plugin)
+          if (proxy.t > 0.5) el.style.setProperty(varName, toValue);
+        }
+      });
+    }
+
+    renderDrone(0, { instant: true });
+
+    // ---- Arrows + dots ----
+    document.getElementById('nextBtn').addEventListener('click', () => goTo((current + 1) % DRONES.length));
+    document.getElementById('prevBtn').addEventListener('click', () => goTo((current - 1 + DRONES.length) % DRONES.length));
+    dotsWrap.addEventListener('click', (e) => {
+      if (e.target.classList.contains('dot')) goTo(parseInt(e.target.dataset.index));
+    });
+
+    function goTo(index) {
+      renderDrone(index);
+      syncScrollToIndex(index);
+    }
+
+    // ---- ScrollTrigger sync: scrolling through the pinned hero also changes the active drone ----
+    let st;
+    function syncScrollToIndex(index) {
+      if (!st) return;
+      const total = DRONES.length - 1;
+      const targetProgress = index / total;
+      const y = st.start + (st.end - st.start) * targetProgress;
+      gsap.to(window, { scrollTo: y, duration: 0.6, ease: 'power2.inOut' });
+    }
+
+    st = ScrollTrigger.create({
+      trigger: '#hero',
+      start: 'top top',
+      end: '+=300%',
+      pin: true,
+      pinSpacing: true,
+      anticipatePin: 1,
+      scrub: 0.6,
+      onUpdate: (self) => {
+        const idx = Math.min(DRONES.length - 1, Math.round(self.progress * (DRONES.length - 1)));
+        if (idx !== current && !animating) {
+          renderDrone(idx);
+        }
+        document.getElementById('scrollHint').style.opacity = self.progress > 0.05 ? 0 : 1;
+      }
+    });
+
+    // ============================================================
+    // MODELOS 3D REALES (GLB) — uno por cada uno de los 4 drones.
+    // Hoy los 4 apuntan al mismo archivo de prueba (DRONES[i].glb);
+    // cuando tengas los 4 modelos reales, solo cambia esa ruta en
+    // cada objeto del array DRONES de arriba — el resto ya funciona.
+    // ============================================================
+
+    function initThreeViewer() {
+      if (typeof THREE === 'undefined') {
+        console.warn('Three.js no cargó (revisa conexión / CDN).');
+        return;
+      }
+      const canvas = document.getElementById('droneCanvas');
+      const rect = stage.getBoundingClientRect();
+
+      three.renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+      three.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      three.renderer.setSize(rect.width, rect.height);
+
+      three.scene = new THREE.Scene();
+      three.camera = new THREE.PerspectiveCamera(35, rect.width / rect.height, 0.1, 100);
+      three.camera.position.set(0, 0.3, 6);
+
+      three.scene.add(new THREE.HemisphereLight(0xffffff, 0x1a2230, 0.9));
+      const key = new THREE.DirectionalLight(0xffffff, 1.2);
+      key.position.set(3, 4, 5);
+      three.scene.add(key);
+      three.rimLight = new THREE.PointLight(DRONES[0].accent, 2.4, 20);
+      three.rimLight.position.set(-3, 1.2, -2);
+      three.scene.add(three.rimLight);
+
+      const loader = new THREE.GLTFLoader();
+
+      DRONES.forEach((d, index) => {
+        if (glbCache[d.glb]) {
+          instantiateModel(index, glbCache[d.glb]);
+          return;
+        }
+        loader.load(
+          d.glb,
+          (gltf) => {
+            glbCache[d.glb] = gltf.scene;
+            instantiateModel(index, gltf.scene);
+          },
+          undefined,
+          (err) => {
+            console.warn(`⚠️ No se pudo cargar el GLB de ${d.code} (${d.glb}). Revisa la ruta y que estés sirviendo el HTML por un servidor local (no file://). El placeholder SVG se queda mientras tanto.`, err);
+          }
+        );
+      });
+
+      window.addEventListener('resize', onThreeResize);
+      animateThree();
+    }
+
+    function instantiateModel(index, sourceScene) {
+      const root = sourceScene.clone(true);
+
+      // auto-centrar y auto-escalar para que quepa en el encuadre
+      const box = new THREE.Box3().setFromObject(root);
+      const size = new THREE.Vector3(); box.getSize(size);
+      const center = new THREE.Vector3(); box.getCenter(center);
+      root.position.sub(center);
+      const maxDim = Math.max(size.x, size.y, size.z) || 1;
+      const baseScale = 2.4 / maxDim;
+
+      const wrapper = new THREE.Group();
+      wrapper.add(root);
+      three.scene.add(wrapper);
+
+      modelInstances[index] = { root: wrapper, baseScale, opacityProxy: { v: 0 } };
+
+      // coloca el modelo instantáneamente en su posición del carrusel actual
+      applyDiagonalPositions3D(current, true);
+
+      console.log(`✅ GLB de ${DRONES[index].code} cargado correctamente`);
+    }
+
+    function onThreeResize() {
+      const rect = stage.getBoundingClientRect();
+      three.renderer.setSize(rect.width, rect.height);
+      three.camera.aspect = rect.width / rect.height;
+      three.camera.updateProjectionMatrix();
+    }
+
+    function animateThree() {
+      requestAnimationFrame(animateThree);
+      const t = Date.now() * 0.0012;
+      Object.values(modelInstances).forEach((inst, i) => {
+        inst.root.rotation.y += 0.0025; // leve giro idle, como si flotara
+        inst.root.position.y += Math.sin(t + i) * 0.0006; // bobbing suave, desfasado por instancia
+      });
+      if (three.renderer) three.renderer.render(three.scene, three.camera);
+    }
+
+    initThreeViewer();
+
+  </script>
+</body>
+
+</html>
