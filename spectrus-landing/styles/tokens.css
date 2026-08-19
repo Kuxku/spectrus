@@ -1,0 +1,29 @@
+:root {
+    /* Base oscura/premium */
+    --bg-base: #05060a;
+    --bg-elevated: #0a0c12;
+    --fg: #f4f5f7;
+    --fg-dim: rgba(244, 245, 247, 0.6);
+    --fg-faint: rgba(244, 245, 247, 0.35);
+    /* Acento — se sobreescribe dinámicamente por dron activo en Fase 4 */
+    --accent: #4ea8ff;
+    --accent-soft: rgba(78, 168, 255, 0.18);
+    /* Tipografía */
+    --font-sans: 'Helvetica Neue', Arial, sans-serif;
+    /* Espaciados / radios reutilizables */
+    --radius-pill: 999px;
+    --radius-card: 14px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg-base);
+    color: var(--fg);
+    font-family: var(--font-sans);
+}
